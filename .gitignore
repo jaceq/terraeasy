@@ -1,0 +1,4 @@
+.terraform
+.terraform-modules
+tf-working-dir/*tf
+tf-working-dir/*tfvars

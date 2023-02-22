@@ -121,7 +121,7 @@ if [ -n "$TERRAFORM_MODULES_GIT_REPOSITORY" ]; then
   update_modules
 fi
 
-terraform -chdir="$WORKING_DIR" init -backend-config="${ENV}-backend.tfvars" -reconfigure
+terraform -chdir="$WORKING_DIR" init -backend-config="${ENV}-backend.tfvars" -reconfigure || exit 9
 
 CMD_ARGS=()
 
@@ -131,14 +131,14 @@ elif [ "$COMMAND" == 'auto-apply' ]; then
   PLAN_FILE="TF_PLAN_$(date +%s).tfplan"
   CMD_ARGS+=('plan' "-out=${PLAN_FILE}" "-var-file=${ENV}-state.tfvars")
   echo "Running: terraform -chdir=$WORKING_DIR ${CMD_ARGS[*]}"
-  terraform -chdir="$WORKING_DIR" ${CMD_ARGS[@]}
+  terraform -chdir="$WORKING_DIR" ${CMD_ARGS[@]} || exit 9
   CMD_ARGS=('apply' '-auto-approve' "$PLAN_FILE")
 else
   CMD_ARGS+=("$COMMAND" "-var-file=${ENV}-state.tfvars")
 fi
 
 echo "Running: terraform -chdir=$WORKING_DIR ${CMD_ARGS[*]}"
-terraform -chdir="$WORKING_DIR" ${CMD_ARGS[@]}
+terraform -chdir="$WORKING_DIR" ${CMD_ARGS[@]} || exit 9
 
 # Clean up working dir
 rm -f "$WORKING_DIR"/*.tf*

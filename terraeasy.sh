@@ -116,9 +116,6 @@ if [ "$LINT" == "true" ]; then
   exit
 fi
 
-#fmt on every run! use base dir and relative to it $ENV dir
-terraform fmt "$TERRAEASY_WORKING_DIR"
-
 if [ -n "$TERRAEASY_TERRAFORM_MODULES_GIT_REPOSITORY" ]; then
   update_modules
 fi
@@ -136,6 +133,8 @@ elif [ "$COMMAND" == 'auto-apply' ]; then
   terraform -chdir="$TERRAEASY_WORKING_DIR" ${CMD_ARGS[@]} || exit 9
   CMD_ARGS=('apply' '-auto-approve' "$PLAN_FILE")
 else
+  # run FMT on normal commands
+  terraform fmt "$TERRAEASY_WORKING_DIR"
   CMD_ARGS+=("$COMMAND" "-var-file=${ENV}-state.tfvars")
 fi
 

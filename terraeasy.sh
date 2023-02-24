@@ -2,16 +2,18 @@
 # Disable quoting of arrays expansion
 # shellcheck disable=SC2068
 
-# Optional URL for git repository with terraform modules, refer to README.md
-#TERRAFORM_MODULES_GIT_REPOSITORY="<you git repository with custom modules>"
+if [ ! -f .terraeasy-config ]; then
+  echo ".terraeasy-config not found!"
+  echo "Please create config, refer to .terraeasy-config.example"
+  exit 1
+fi
 
-WORKING_DIR="tf-working-dir"
-COMMON_BASE_DIR="common"
-TERRAFORM_MODULES_PATH="./.terraform-modules"
+# shellcheck source=.terraeasy-config
+source .terraeasy-config
 
 # Export / set terraform common_prefix variable, useful
 # for using templates from common directory.
-export TF_VAR_common_prefix="${COMMON_BASE_DIR}-"
+export TF_VAR_common_prefix="${TERRAEASY_COMMON_BASE_DIR}-"
 
 print_help(){
   echo "  Usage:"
@@ -40,10 +42,10 @@ display_warning(){
 
 update_modules(){
   # If folder exists try git pull
-  if [ -d "$TERRAFORM_MODULES_PATH" ]; then
-    git -C "$TERRAFORM_MODULES_PATH" pull || display_warning "Git pull of modules failed!"
+  if [ -d "$TERRAEASY_TERRAFORM_MODULES_PATH" ]; then
+    git -C "$TERRAEASY_TERRAFORM_MODULES_PATH" pull || display_warning "Git pull of modules failed!"
   else
-    git clone "$TERRAFORM_MODULES_GIT_REPOSITORY" "$TERRAFORM_MODULES_PATH"
+    git clone "$TERRAEASY_TERRAFORM_MODULES_GIT_REPOSITORY" "$TERRAEASY_TERRAFORM_MODULES_PATH"
   fi
 }
 
@@ -51,7 +53,7 @@ link_working_dir(){
   BASE_DIR="$1"
   for FILE in "$BASE_DIR"/*tf*; do
     NEW_FILE="${FILE//\//-}"
-    ln -s "${PWD}/${FILE}" "${WORKING_DIR}/${NEW_FILE}"
+    ln -s "${PWD}/${FILE}" "${TERRAEASY_WORKING_DIR}/${NEW_FILE}"
   done
 }
 
@@ -102,26 +104,26 @@ fi
 printf 'Working env: %s\n' "$ENV"
 
 # Link contents of common and chosen environment in working dir
-mkdir -p "$WORKING_DIR"
-rm -f "$WORKING_DIR"/*.tf*
-link_working_dir "$COMMON_BASE_DIR"
+mkdir -p "$TERRAEASY_WORKING_DIR"
+rm -f "$TERRAEASY_WORKING_DIR"/*.tf*
+link_working_dir "$TERRAEASY_COMMON_BASE_DIR"
 link_working_dir "$ENV"
 
 if [ "$LINT" == "true" ]; then
   echo 'Found "-l or --lint" parameter, doing only linting'
-  tflint --chdir="$WORKING_DIR"
-  rm -f "$WORKING_DIR"/*.tf*
+  tflint --chdir="$TERRAEASY_WORKING_DIR"
+  rm -f "$TERRAEASY_WORKING_DIR"/*.tf*
   exit
 fi
 
 #fmt on every run! use base dir and relative to it $ENV dir
-terraform fmt "$WORKING_DIR"
+terraform fmt "$TERRAEASY_WORKING_DIR"
 
-if [ -n "$TERRAFORM_MODULES_GIT_REPOSITORY" ]; then
+if [ -n "$TERRAEASY_TERRAFORM_MODULES_GIT_REPOSITORY" ]; then
   update_modules
 fi
 
-terraform -chdir="$WORKING_DIR" init -backend-config="${ENV}-backend.tfvars" -reconfigure || exit 9
+terraform -chdir="$TERRAEASY_WORKING_DIR" init -backend-config="${ENV}-backend.tfvars" -reconfigure || exit 9
 
 CMD_ARGS=()
 
@@ -130,15 +132,15 @@ if [ "$NAKED_COMMAND" != '' ]; then
 elif [ "$COMMAND" == 'auto-apply' ]; then
   PLAN_FILE="TF_PLAN_$(date +%s).tfplan"
   CMD_ARGS+=('plan' "-out=${PLAN_FILE}" "-var-file=${ENV}-state.tfvars")
-  echo "Running: terraform -chdir=$WORKING_DIR ${CMD_ARGS[*]}"
-  terraform -chdir="$WORKING_DIR" ${CMD_ARGS[@]} || exit 9
+  echo "Running: terraform -chdir=$TERRAEASY_WORKING_DIR ${CMD_ARGS[*]}"
+  terraform -chdir="$TERRAEASY_WORKING_DIR" ${CMD_ARGS[@]} || exit 9
   CMD_ARGS=('apply' '-auto-approve' "$PLAN_FILE")
 else
   CMD_ARGS+=("$COMMAND" "-var-file=${ENV}-state.tfvars")
 fi
 
-echo "Running: terraform -chdir=$WORKING_DIR ${CMD_ARGS[*]}"
-terraform -chdir="$WORKING_DIR" ${CMD_ARGS[@]} || exit 9
+echo "Running: terraform -chdir=$TERRAEASY_WORKING_DIR ${CMD_ARGS[*]}"
+terraform -chdir="$TERRAEASY_WORKING_DIR" ${CMD_ARGS[@]} || exit 9
 
 # Clean up working dir
-rm -f "$WORKING_DIR"/*.tf*
+rm -f "$TERRAEASY_WORKING_DIR"/*.tf*

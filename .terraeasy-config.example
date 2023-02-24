@@ -1,0 +1,20 @@
+# Terraeasy configuration, this file will get sourced
+# by terraeasy
+
+# Name of directory that stores terraform resources
+# that are common between environments
+TERRAEASY_COMMON_BASE_DIR="common"
+
+# Name of terraeasy working directory, this directory
+# will be used for linking files from `TERRAEASY_COMMON_BASE_DIR` and
+# environment specific directory (eg. prod or stage)
+# It will also contain `.terraform.lock.hcl` file
+TERRAEASY_WORKING_DIR="tf-working-dir"
+
+# Path where shared Terraform modules will be checked out
+# if `TERRAEASY_TERRAFORM_MODULES_GIT_REPOSITORY` is configured
+TERRAEASY_TERRAFORM_MODULES_PATH="./.terraform-modules"
+
+# Git repository URL for custom Terraform modules
+# will be cloned to `TERRAEASY_TERRAFORM_MODULES_PATH`
+#TERRAEASY_TERRAFORM_MODULES_GIT_REPOSITORY=

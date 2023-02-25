@@ -1,3 +1,5 @@
+![Terreasy](https://miro.medium.com/v2/resize:fit:786/format:webp/1*KRETsmuRToO6AXyl9NHdtQ.png)
+
 # terraeasy
 Easy Terraform wrapper
 

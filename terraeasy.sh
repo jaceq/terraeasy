@@ -23,6 +23,7 @@ print_help(){
   echo "    -e|--environment   -- working environment, eg. prod, stage or dev"
   echo "    -l|--lint          -- lint terraform, requires installed tflint (in path)"
   echo "    -n|--naked-command -- Quoted(!!) naked command to pass to terraform binary"
+  echo "    -s|--silent        -- Show only output from final terraform command (useful for collecting outputs)"
   echo ""
   echo "  Virtual commands:"
   echo ""
@@ -74,6 +75,9 @@ while (($#)); do
       shift
       NAKED_COMMAND="$1"
       ;;
+    -s|--silent)
+      SILENT="true"
+      ;;
     *)
       printf '%s\n' "Unknown option $1" >&2
       print_help
@@ -99,6 +103,13 @@ if [ "$ENV" == "" ]; then
   echo 'Environment is not defined.'
   print_help
   exit 1
+fi
+
+# Implement silent option
+if [ "$SILENT" == "true" ]; then
+  exec 3>&1 &>/dev/null
+else
+  exec 3>&1
 fi
 
 printf 'Working env: %s\n' "$ENV"
@@ -139,7 +150,7 @@ else
 fi
 
 echo "Running: terraform -chdir=$TERRAEASY_WORKING_DIR ${CMD_ARGS[*]}"
-terraform -chdir="$TERRAEASY_WORKING_DIR" ${CMD_ARGS[@]} || exit 9
+terraform -chdir="$TERRAEASY_WORKING_DIR" ${CMD_ARGS[@]} >&3 || exit 9
 
 # Clean up working dir
 rm -f "$TERRAEASY_WORKING_DIR"/*.tf*

@@ -15,6 +15,9 @@ TERRAEASY_WORKING_DIR="tf-working-dir"
 # if `TERRAEASY_TERRAFORM_MODULES_GIT_REPOSITORY` is configured
 TERRAEASY_TERRAFORM_MODULES_PATH="./.terraform-modules"
 
+# Raw content git repo of terraeasy
+TERRAEASY_GIT_REPOSITORY_RAW='raw.githubusercontent.com/jaceq/terraeasy/main'
+
 # Git repository URL for custom Terraform modules
 # will be cloned to `TERRAEASY_TERRAFORM_MODULES_PATH`
 #TERRAEASY_TERRAFORM_MODULES_GIT_REPOSITORY=

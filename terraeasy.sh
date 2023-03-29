@@ -155,6 +155,13 @@ if [ -z "$ENV" ]; then
   exit 1
 fi
 
+# Check is given environment exists
+if ! ls -d "${ENV}" 1>/dev/null 2>&1; then
+  echo "Given environment ${ENV} not found!"
+  print_help
+  exit 1
+fi
+
 # Implement silent option
 if [ -n "$SILENT" ]; then
   exec 3>&1 &>/dev/null

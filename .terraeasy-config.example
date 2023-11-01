@@ -21,3 +21,12 @@ TERRAEASY_GIT_REPOSITORY_RAW='raw.githubusercontent.com/jaceq/terraeasy/main'
 # Git repository URL for custom Terraform modules
 # will be cloned to `TERRAEASY_TERRAFORM_MODULES_PATH`
 #TERRAEASY_TERRAFORM_MODULES_GIT_REPOSITORY=
+
+# Below values will be applied as key=value pairs to -backend-config= terraform variable.
+# A special place holder ##ENVIRONMENT## is available and will be rendered accordingly
+# by terraeasy by using '-e' variable value.
+# A static backend file (<environment>/backend.tfvars) will be added automatically if it
+# exists, it is however optional.
+# A combination of static file and dynamic configuration is allowed.
+# Example: TERRAEASY_TERRAFORM_BACKEND_CONFIG="key=remote-##ENVIRONMENT## bucket=my-bucket-##ENVIRONMENT##"
+TERRAEASY_TERRAFORM_BACKEND_CONFIG=""

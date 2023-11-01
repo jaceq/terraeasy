@@ -188,7 +188,16 @@ if [ -n "$TERRAEASY_TERRAFORM_MODULES_GIT_REPOSITORY" ]; then
   update_modules
 fi
 
-terraform -chdir="$TERRAEASY_WORKING_DIR" init -backend-config="${ENV}-backend.tfvars" -reconfigure || error_exit 'terraform backend configuration failed'
+# Build dynamic backend config(s)
+TERRAFORM_BACKEND_CONFIG=()
+if [ -f "${TERRAEASY_WORKING_DIR}/${ENV}-backend.tfvars" ]; then
+  TERRAFORM_BACKEND_CONFIG+=("-backend-config=${ENV}-backend.tfvars")
+fi
+for VARIABLE in $TERRAEASY_TERRAFORM_BACKEND_CONFIG; do
+  TERRAFORM_BACKEND_CONFIG+=("-backend-config=${VARIABLE//##ENVIRONMENT##/"${ENV}"}")
+done
+
+terraform -chdir="$TERRAEASY_WORKING_DIR" init ${TERRAFORM_BACKEND_CONFIG[@]} -reconfigure || error_exit 'terraform backend configuration failed'
 
 CMD_ARGS=()
 

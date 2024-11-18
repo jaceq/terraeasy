@@ -194,7 +194,7 @@ if [ -f "${TERRAEASY_WORKING_DIR}/${ENV}-backend.tfvars" ]; then
   TERRAFORM_BACKEND_CONFIG+=("-backend-config=${ENV}-backend.tfvars")
 fi
 for VARIABLE in $TERRAEASY_TERRAFORM_BACKEND_CONFIG; do
-  TERRAFORM_BACKEND_CONFIG+=("-backend-config=${VARIABLE//##ENVIRONMENT##/"${ENV}"}")
+  TERRAFORM_BACKEND_CONFIG+=("-backend-config=${VARIABLE//##ENVIRONMENT##/${ENV}}")
 done
 
 terraform -chdir="$TERRAEASY_WORKING_DIR" init ${TERRAFORM_BACKEND_CONFIG[@]} -reconfigure || error_exit 'terraform backend configuration failed'

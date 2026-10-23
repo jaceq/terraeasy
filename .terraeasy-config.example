@@ -30,3 +30,8 @@ TERRAEASY_GIT_REPOSITORY_RAW='raw.githubusercontent.com/jaceq/terraeasy/main'
 # A combination of static file and dynamic configuration is allowed.
 # Example: TERRAEASY_TERRAFORM_BACKEND_CONFIG="key=remote-##ENVIRONMENT## bucket=my-bucket-##ENVIRONMENT##"
 TERRAEASY_TERRAFORM_BACKEND_CONFIG=""
+
+# As above, these are applied instead of the above ones in case if CI mode is activated
+#  with -m ci or --mode ci.
+#  It enables different backend configuration for local and ci environments
+TERRAEASY_TERRAFORM_CI_BACKEND_CONFIG=""

@@ -24,6 +24,7 @@ print_help(){
   echo "    -c|--command       -- terraform command, eg. apply, plan or virtual command eg. 'auto-apply'"
   echo "    -e|--environment   -- working environment, eg. prod, stage or dev"
   echo "    -l|--lint          -- lint terraform, requires installed tflint (in path)"
+  echo "    -m|--mode          -- Run mode, currently supported: 'ci' (uses TERRAEASY_TERRAFORM_CI_BACKEND_CONFIG)"
   echo "    -n|--naked-command -- Quoted(!!) naked command to pass to terraform binary"
   echo "    -s|--silent        -- Show only output from final terraform command (useful for collecting outputs)"
   echo "    -u|--update        -- Self update, pull latest terraeasy.sh from github"
@@ -108,6 +109,11 @@ while (($#)); do
       LINT='true'
       VALID='true'
       ;;
+    -m|--mode)
+      shift
+      MODE="$1"
+      MODE_SET='true'
+      ;;
     -n|--naked-command)
       shift
       NAKED_COMMAND="$1"
@@ -145,6 +151,12 @@ fi
 
 if [ -n "$COMMAND" ] && [ -n "$NAKED_COMMAND" ]; then
   echo 'Cannot use -c and -n arguments at the same time, only one is allowed'
+  print_help
+  exit 1
+fi
+
+if [ -n "$MODE_SET" ] && [ "$MODE" != 'ci' ]; then
+  echo "Unsupported mode: ${MODE}"
   print_help
   exit 1
 fi
@@ -193,7 +205,11 @@ TERRAFORM_BACKEND_CONFIG=()
 if [ -f "${TERRAEASY_WORKING_DIR}/${ENV}-backend.tfvars" ]; then
   TERRAFORM_BACKEND_CONFIG+=("-backend-config=${ENV}-backend.tfvars")
 fi
-for VARIABLE in $TERRAEASY_TERRAFORM_BACKEND_CONFIG; do
+BACKEND_CONFIG="$TERRAEASY_TERRAFORM_BACKEND_CONFIG"
+if [ "$MODE" == 'ci' ]; then
+  BACKEND_CONFIG="$TERRAEASY_TERRAFORM_CI_BACKEND_CONFIG"
+fi
+for VARIABLE in $BACKEND_CONFIG; do
   TERRAFORM_BACKEND_CONFIG+=("-backend-config=${VARIABLE//##ENVIRONMENT##/${ENV}}")
 done
 

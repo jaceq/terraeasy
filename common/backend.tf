@@ -3,7 +3,7 @@
 
 terraform {
   backend "s3" {
-    region         = "eu-central-1"
-    dynamodb_table = "tf-state-lock"
+    region       = "eu-central-1"
+    use_lockfile = true
   }
 }
